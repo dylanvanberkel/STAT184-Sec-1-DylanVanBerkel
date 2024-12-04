@@ -1,0 +1,129 @@
+---
+title: "Covid Vaccine"
+author: "Leah The Third of Minneapolis"
+format: html
+editor: visual
+---
+
+## Prompt
+
+The year is 2021. Now that millions of people have been vaccinated and subsequently infected by COVID, the FDA is re-investigating the efficacy of the vaccine. As an analyst at the FDA, you are tasked with answering the question - does the COVID vaccine reduce the mortality rate of COVID infection? (We are keeping the analysis limited to this dataset)
+
+```{r}
+#| label: load-packages
+#| echo: false
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+#| label: load-data
+#| echo: false
+
+url <- "https://www.openintro.org/data/csv/simpsons_paradox_covid.csv"
+data <- read.csv(url)
+```
+
+```{r}
+
+# Display the first few rows of the data
+head(data)
+
+# Summarize the data
+summary(data)
+
+```
+
+```{r}
+
+#| echo: false
+# Calculate and plot mortality rates by vaccine status
+table(data$vaccine_status, data$outcome)
+
+mortality_rates_vaccine <- data %>%
+  group_by(vaccine_status) %>%
+  summarize(
+    Total = n(),
+    Deaths = sum(outcome == "death"),
+    mortality_Rate = Deaths / Total
+  )
+
+ggplot(mortality_rates_vaccine, aes(x = vaccine_status, y = mortality_Rate)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Mortality Rates by Vaccine Status", 
+       x = "Vaccine Status", 
+       y = "Mortality Rate") +
+  theme_minimal()
+
+```
+
+Looking specifically at the numbers, 116633 people were vaccinated and 481 died from Covid, while 150799 were un-vaccinated, and of them, 253 died. That shows while almost 40000 fewer people were vaccinated, almost double the number of people who were vaccinated. When looking at the graph around .0017 of the un-vaccinated people passed away, while around .0041 of the people vaccinated passed away.
+
+```{r}
+
+#| echo: false
+# Calculate and plot mortality rates by age group
+mortality_rate_age <- data %>%
+  select(age_group, outcome) %>%
+  group_by(age_group) %>%
+  summarize(
+    Total = n(),
+    Deaths = sum(outcome == "death"),
+    mortality_Rate = Deaths / Total
+  )
+
+ggplot(mortality_rate_age, aes(x = age_group, y = mortality_Rate)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Mortality Rates by Age", 
+       x = "Age Group", 
+       y = "Mortality Rate") +
+  theme_minimal()
+```
+
+When looking at the mortality rates of Covid by age, it can be seen that around .024 people over the age of 50 died of Covid, whereas less than .001 passed away under the age of 50 from COVID-19.
+
+```{r}
+
+#| echo: false
+
+
+# Plot study population distribution by age and vaccine status
+applications_vaccine_status_age <- data %>%
+  select(age_group, vaccine_status) %>%
+  group_by(age_group, vaccine_status) %>%
+  summarize(
+    Total = n()
+  )
+
+ggplot(applications_vaccine_status_age, aes(x = age_group, y = Total, fill = vaccine_status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Study Population by Age and Vaccine Status", 
+       x = "Age Group", 
+       y = "Study Population") +
+  theme_minimal()
+```
+
+When looking at the study population by age and vaccine status, it is clear that a larger proportion of unvaccinated individuals fall in the under 50 age group, with around 150,000 people, compared to roughly 100,000 vaccinated individuals in the same age group. In the over 50 age group, there is a much smaller population overall, but the vaccinated group is slightly larger than the unvaccinated group, with approximately 25,000 vaccinated compared to fewer than 10,000 unvaccinated. This distribution shows that younger individuals make up the majority of the study population, with more people under 50 remaining unvaccinated than vaccinated.
+
+```{r}
+#| echo: false
+# Calculate and plot mortality rates by age and vaccine status
+mortality_rates_vaccine_status_age <- data %>%
+  group_by(age_group, vaccine_status) %>%
+  summarize(
+    Total = n(),
+    Deaths = sum(outcome == "death"),
+    mortality_Rate = Deaths / Total
+  )
+
+ggplot(mortality_rates_vaccine_status_age, aes(x = age_group, y = mortality_Rate, fill = vaccine_status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Mortality Rates by Age and Vaccine Status", 
+       x = "Age Group", 
+       y = "Mortality Rate") +
+  theme_minimal()
+```
+
+When looking at COVID-19 mortality rates by age, it’s evident that approximately 6% of unvaccinated individuals over the age of 50 died from COVID-19, whereas only around 2% of vaccinated individuals in the same age group passed away. In contrast, for those under 50, the mortality rate is minimal for both vaccinated and unvaccinated groups, with less than 0.1% passing away. This shows a huge difference in mortality risk based on vaccination status, more so for individuals over 50 years old.
